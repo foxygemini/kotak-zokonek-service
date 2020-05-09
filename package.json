@@ -1,0 +1,29 @@
+{
+  "name": "kotak-zokonek-service",
+  "version": "1.0.0",
+  "description": "Handle service for me",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxygemini/kotak-zokonek-service.git"
+  },
+  "keywords": [],
+  "author": "Juniawan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/foxygemini/kotak-zokonek-service/issues"
+  },
+  "homepage": "https://github.com/foxygemini/kotak-zokonek-service#readme",
+  "dependencies": {
+    "@grpc/proto-loader": "^0.5.4",
+    "amqplib": "^0.5.5",
+    "dotenv": "^8.2.0",
+    "grpc": "^1.24.2",
+    "kotak-pustaka": "0.0.2",
+    "mongoose": "^5.9.13",
+    "redis": "^3.0.2"
+  }
+}
