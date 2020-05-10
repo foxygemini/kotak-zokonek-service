@@ -1,4 +1,4 @@
-const grpcResponse = require("./../response/rpc");
+const grpcResponse = require("../response/rpc");
 class grpcFlow {
   constructor(args){
     this.request = {};
