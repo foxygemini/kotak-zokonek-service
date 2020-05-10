@@ -5,7 +5,7 @@ class grpcFlow {
     this.execMe = null;
     this.callback = null;
     this.response = null;
-    this.scene = process.env.APP_NAME;
+    this.caller = null;
     this.curArg = 0;
     this.maxArg = 0;
     this.data = {};
@@ -27,8 +27,8 @@ class grpcFlow {
     this.response = grpcResponse(callback);
     this.call = call;
     this.request = call.request;
-    if(call.request.scene){
-      this.scene = call.request.scene;
+    if(call.request.caller){
+      this.caller = call.request.caller;
     }
     this.methods[this.curArg](this);
   }
