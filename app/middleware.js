@@ -1,4 +1,4 @@
-const grpcResponse = require("./../../libs/renderer/grpc-response");
+const grpcResponse = require("./../response/rpc");
 class grpcFlow {
   constructor(args){
     this.request = {};
@@ -14,7 +14,7 @@ class grpcFlow {
   }
   parseArgs(args){
     if(args.length < 1){
-      process.errorLog(this.scene, "Arguments invalid", null, __filename, __linenumber);
+      process.traceLog("warning", "Arguments invalid", __filename, __linenumber);
       throw new Error("No argument passed");
     }else{
       this.maxArg = args.length-1;

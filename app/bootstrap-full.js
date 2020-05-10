@@ -6,7 +6,7 @@ const amqp = require('amqplib/callback_api');
 
 module.exports = (options, callback) => {
   try{
-    process.staticConfig = require("")
+    process.staticConfig = require(`${process.basepaths.base}/connection/configs/config`)
     mongoose.connect('mongodb://'+process.env.DB_USERNAME+':'+process.env.DB_PASSWORD+'@'+process.env.DB_HOST+':'+process.env.DB_PORT+'/'+process.env.DB_NAME, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
     const db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));
@@ -17,7 +17,7 @@ module.exports = (options, callback) => {
         process.traceLog("info", "Redis connected", __filename, __linenumber);
         amqp.connect('amqp://'+process.env.AMPQ_USERNAME+":"+process.env.AMPQ_PASSWORD+"@"+process.env.AMPQ_HOST, (err, amqpCon) => {
           if(err){
-            process.errorLog(process.env.APP_NAME, "Connect to amqp server failed", {conn: 'amqp://'+process.env.AMPQ_USERNAME+":"+process.env.AMPQ_PASSWORD+"@"+process.env.AMPQ_HOST, err}, __filename, __linenumber);
+            process.errorLog("Connect to amqp server failed", err, __filename, __linenumber, {conn: 'amqp://'+process.env.AMPQ_USERNAME+":"+process.env.AMPQ_PASSWORD+"@"+process.env.AMPQ_HOST});
             
           }else{
             process.traceLog("info", `Message broker connected`, __filename, __linenumber);
@@ -34,7 +34,7 @@ module.exports = (options, callback) => {
               if(process.brokerChannels[topic]){
                 process.brokerChannels[topic].sendToQueue(topic, Buffer.from(data));
               }else{
-                process.traceLog("warning", "Channel not found", {topic}, __filename, __linenumber);
+                process.traceLog("warning", "Channel not found", __filename, __linenumber, {topic});
               }
             }
   
@@ -51,7 +51,7 @@ module.exports = (options, callback) => {
                 options.publishers.map(publisher => {
                   amqpCon.createChannel((err, channel) => {
                     if(err){
-                      process.errorLog(process.scene, "Create broker channel failed", err, __filename, __linenumber);
+                      process.errorLog("Create broker channel failed", err, __filename, __linenumber);
                     }else{
                       channel.assertQueue(publisher);
                       process.brokerChannels[publisher] = channel;
@@ -61,7 +61,7 @@ module.exports = (options, callback) => {
               }
               if(options.subscribers){
                 const parseBrokerData = dataBuffer => new Promise((resolve, reject) => {
-                  process.traceLog("info", "Start validate broker data for email sender broker", null, __filename, __linenumber);
+                  process.traceLog("info", "Start validate broker data for email sender broker", __filename, __linenumber);
                   const brokerData = JSON.parse(dataBuffer.content.toString());
                   if(brokerData){
                     resolve(brokerData);
@@ -72,16 +72,16 @@ module.exports = (options, callback) => {
                 Object.keys(options.subscribers).map(subscriberKey=> {
                   amqpCon.createChannel((err, channel) => {
                     if(err){
-                      process.errorLog(process.scene, "Create consumer channel failed", err, __filename, __linenumber);
+                      process.errorLog("Create consumer channel failed", err, __filename, __linenumber);
                     }else{
                       channel.assertQueue(subscriberKey);
                       channel.consume(subscriberKey, msg => {
                         if(msg.content){
                           parseBrokerData(msg).then(brokerData => {
-                            process.traceLog("info", "Notification send mail message broker received", {brokerData}, __filename, __linenumber);          
+                            process.traceLog("info", "Notification send mail message broker received", __filename, __linenumber, {brokerData});          
                             options.subscribers[subscriberKey](brokerData);
                           }).catch(err => {
-                            process.traceLog("warning", "Parse broker data failed", err, __filename, __linenumber);          
+                            process.traceLog("warning", "Parse broker data failed", __filename, __linenumber, err);          
                           });
                         }
                       }, {noAck: true});
@@ -98,7 +98,7 @@ module.exports = (options, callback) => {
       })
     })
   }catch(err){
-    process.errorLog(process.scene, "Bootstrap failed. Some error occured.", err, __filename, __linenumber);
+    process.errorLog("Bootstrap failed. Some error occured.", err, __filename, __linenumber);
     callback(err);
   }
 }

@@ -2,16 +2,16 @@
 
 const amqp = require('amqplib/callback_api');
 
-module.exports = (scene, options, callback) => {
-  process.traceLog("info", `Start bootstrapping microservice with minimal requirement`, {scene}, __filename, __linenumber);
-  amqp.connect('amqp://'+process.env.AMPQ_USERNAME+":"+process.env.AMPQ_PASSWORD+"@"+process.env.AMPQ_HOST, (err, ampqCon) => {
+module.exports = (options, callback) => {
+  process.traceLog("info", `Start bootstrapping microservice with minimal requirement`, __filename, __linenumber);
+  amqp.connect('amqp://'+process.env.AMPQ_USERNAME+":"+process.env.AMPQ_PASSWORD+"@"+process.env.AMPQ_HOST, (err, amqpCon) => {
     if(err){
-      process.errorLog(scene, "Connect to amqp server failed", {conn: 'amqp://'+process.env.AMPQ_USERNAME+":"+process.env.AMPQ_PASSWORD+"@"+process.env.AMPQ_HOST, err}, __filename, __linenumber);
+      process.errorLog("Connect to amqp server failed", err, __filename, __linenumber, {conn: 'amqp://'+process.env.AMPQ_USERNAME+":"+process.env.AMPQ_PASSWORD+"@"+process.env.AMPQ_HOST});
       if(callback){
         callback(err);
       }
     }else{
-      process.traceLog("info", `Message broker connected`, {scene}, __filename, __linenumber);
+      process.traceLog("info", `Message broker connected`, __filename, __linenumber);
 
       /**
        * Broker channel
@@ -26,7 +26,7 @@ module.exports = (scene, options, callback) => {
         if(process.brokerChannels[topic]){
           process.brokerChannels[topic].sendToQueue(topic, Buffer.from(data));
         }else{
-          process.traceLog("warning", "Channel not found", {topic}, __filename, __linenumber);
+          process.traceLog("warning", "Channel not found", __filename, __linenumber, {topic});
         }
       }
 
@@ -34,7 +34,7 @@ module.exports = (scene, options, callback) => {
         if(options.services && options.services.length>0){
           options.services.map(service => {
             if(process.staticConfig.services[service]){
-              process.appServices[service] = require(process.staticConfig.services[service])(process.scene);
+              process.appServices[service] = require(process.staticConfig.services[service])();
             }
           });
         }
@@ -43,7 +43,7 @@ module.exports = (scene, options, callback) => {
           options.publishers.map(publisher => {
             amqpCon.createChannel((err, channel) => {
               if(err){
-                process.errorLog(process.scene, "Create broker channel failed", err, __filename, __linenumber);
+                process.errorLog("Create broker channel failed", err, __filename, __linenumber);
               }else{
                 channel.assertQueue(publisher);
                 process.brokerChannels[publisher] = channel;
@@ -53,7 +53,7 @@ module.exports = (scene, options, callback) => {
         }
         if(options.subscribers){
           const parseBrokerData = dataBuffer => new Promise((resolve, reject) => {
-            process.traceLog("info", "Start validate broker data for email sender broker", null, __filename, __linenumber);
+            process.traceLog("info", "Start validate broker data for email sender broker", __filename, __linenumber);
             const brokerData = JSON.parse(dataBuffer.content.toString());
             if(brokerData){
               resolve(brokerData);
@@ -64,16 +64,16 @@ module.exports = (scene, options, callback) => {
           Object.keys(options.subscribers).map(subscriberKey=> {
             amqpCon.createChannel((err, channel) => {
               if(err){
-                process.errorLog(process.scene, "Create consumer channel failed", err, __filename, __linenumber);
+                process.errorLog("Create consumer channel failed", err, __filename, __linenumber);
               }else{
                 channel.assertQueue(subscriberKey);
                 channel.consume(subscriberKey, msg => {
                   if(msg.content){
                     parseBrokerData(msg).then(brokerData => {
-                      process.traceLog("info", "Notification send mail message broker received", {brokerData}, __filename, __linenumber);          
+                      process.traceLog("info", "Notification send mail message broker received", __filename, __linenumber, {brokerData});          
                       options.subscribers[subscriberKey](brokerData);
                     }).catch(err => {
-                      process.traceLog("warning", "Parse broker data failed", err, __filename, __linenumber);          
+                      process.traceLog("warning", "Parse broker data failed", __filename, __linenumber, err);
                     });
                   }
                 }, {noAck: true});
