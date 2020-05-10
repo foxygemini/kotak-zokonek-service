@@ -1,6 +1,6 @@
 {
   "name": "kotak-zokonek-service",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Handle service for me",
   "main": "index.js",
   "scripts": {

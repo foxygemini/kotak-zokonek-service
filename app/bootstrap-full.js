@@ -4,9 +4,10 @@ const mongoose = require('mongoose');
 const redis = require("redis");
 const amqp = require('amqplib/callback_api');
 
+process.staticConfig = require(`${process.basepaths.base}/connection/configs/config`);
+
 module.exports = (options, callback) => {
   try{
-    process.staticConfig = require(`${process.basepaths.base}/connection/configs/config`)
     mongoose.connect('mongodb://'+process.env.DB_USERNAME+':'+process.env.DB_PASSWORD+'@'+process.env.DB_HOST+':'+process.env.DB_PORT+'/'+process.env.DB_NAME, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
     const db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));

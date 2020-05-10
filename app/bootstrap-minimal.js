@@ -1,7 +1,7 @@
 "use strict";
 
 const amqp = require('amqplib/callback_api');
-
+process.staticConfig = require(`${process.basepaths.base}/connection/configs/config`);
 module.exports = (options, callback) => {
   process.traceLog("info", `Start bootstrapping microservice with minimal requirement`, __filename, __linenumber);
   amqp.connect('amqp://'+process.env.AMPQ_USERNAME+":"+process.env.AMPQ_PASSWORD+"@"+process.env.AMPQ_HOST, (err, amqpCon) => {
