@@ -8,7 +8,7 @@ class grpcFlow {
     this.caller = null;
     this.curArg = 0;
     this.maxArg = 0;
-    this.data = {};
+    this.data = null;
     this.methods = [];
     this.parseArgs(args);
   }
@@ -48,7 +48,7 @@ class grpcFlow {
     }
   }
   setData(data){
-    Object.assign(this.data, data);
+    this.data = data;
   }
   getData(){
     return this.data;
