@@ -1,6 +1,6 @@
 {
   "name": "kotak-zokonek-service",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Handle service for me",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,6 @@
     "amqplib": "^0.5.5",
     "dotenv": "^8.2.0",
     "grpc": "^1.24.2",
-    "kotak-pustaka": "0.0.2",
     "mongoose": "^5.9.13",
     "redis": "^3.0.2"
   }
